@@ -198,7 +198,7 @@ paths:
           description: Successful response
           schema:
             $ref: "#/definitions/Template"
-  /template{templateId}:
+  /template/{templateId}:
     delete:
       description: "Deletes existing visuzualization"
       tags:
@@ -267,7 +267,7 @@ definitions:
       parameters:
         type: string
         description: Template parameters in JSON format
-      version: 
+      version:
         type: integer
         description: Template version number >=1
       templateBody:
