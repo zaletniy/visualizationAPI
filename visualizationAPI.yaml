@@ -3,11 +3,32 @@ swagger: '2.0'
 info:
   version: "1.0.0"
   title: Visualization API
-
+securityDefinitions:
+  ApiKeyAuth:
+    type: apiKey
+    in: header
+    name: X-API-Key
 basePath: /v1
 # Describe your paths here
 paths:
-  # This is a path endpoint. Change it.
+  /auth/openstack:
+    get:
+      description: Authenticate using keystone token
+      tags:
+        - auth
+      parameters:
+        -
+          name: X-Subject-Token
+          in: header
+          type: string
+          required: true
+          description: OpenStack token
+      responses:
+        200:
+          description: Token model
+          schema:
+            $ref: "#/definitions/Token"
+
   /datasources:
     # This is a HTTP operation
     get:
@@ -17,6 +38,8 @@ paths:
       # This is array of GET operation parameters:
       tags:
         - datasource
+      security:
+        - ApiKeyAuth: []
       parameters:
         -
           name: name
@@ -36,7 +59,8 @@ paths:
       description: "Registers new `Datasource`"
       tags:
         - datasource
-        - low-priority
+      security:
+        - ApiKeyAuth: []
       parameters:
         - in: body
           name: body
@@ -58,6 +82,8 @@ paths:
       description: Returns datasource by id
       tags:
         - datasource
+      security:
+        - ApiKeyAuth: []
       parameters:
         -
           name: datasourceId
@@ -73,7 +99,8 @@ paths:
       description: "Deletes existing datasource"
       tags:
         - datasource
-        - low-priority
+      security:
+        - ApiKeyAuth: []
       parameters:
        -
           name: datasourceId
@@ -97,6 +124,8 @@ paths:
       # This is array of GET operation parameters:
       tags:
         - visualization
+      security:
+        - ApiKeyAuth: []
       parameters:
         -
           name: name
@@ -116,6 +145,8 @@ paths:
       description: "Creates new `Visualization`"
       tags:
         - visualization
+      security:
+        - ApiKeyAuth: []
       parameters:
         - in: body
           name: body
@@ -137,6 +168,8 @@ paths:
       description: "Deletes existing visuzualization"
       tags:
         - visualization
+      security:
+        - ApiKeyAuth: []
       parameters:
         -
           name: visualizationId
@@ -161,6 +194,8 @@ paths:
       # This is array of GET operation parameters:
       tags:
         - templates
+      security:
+        - ApiKeyAuth: []
       parameters:
         -
           name: name
@@ -186,6 +221,8 @@ paths:
       description: "Creates new `template`"
       tags:
         - templates
+      security:
+        - ApiKeyAuth: []
       parameters:
         - in: body
           name: body
@@ -203,6 +240,8 @@ paths:
       description: "Deletes existing visuzualization"
       tags:
         - templates
+      security:
+        - ApiKeyAuth: []
       parameters:
         -
           name: templateId
@@ -232,11 +271,6 @@ definitions:
       details:
         type: string
         description: "Error technical details"
-  DatasourceTypes:
-    type: string
-    enum: &DATASOURCE_TYPES
-      - influxdb
-      - unimplemented
   Datasource:
     type: object
     properties:
@@ -245,7 +279,9 @@ definitions:
         format: int64
       type:
         type: string
-        enum: *DATASOURCE_TYPES
+        enum: &DATASOURCE_TYPES
+          - influxdb
+          - unimplemented
       name:
         type: string
         description: Datasource name
@@ -304,3 +340,9 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Dashboard"
+  Token:
+    type: object
+    properties:
+      payload:
+        type: string
+        description: Token payload
