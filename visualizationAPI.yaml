@@ -153,7 +153,7 @@ paths:
           description: Visualization defintion to add
           required: true
           schema:
-            $ref: "#/definitions/Datasource"
+            $ref: "#/definitions/Visualization"
       responses:
         200:
           description: Successful response
