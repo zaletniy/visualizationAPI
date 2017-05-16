@@ -4,10 +4,10 @@ info:
   version: "1.0.0"
   title: Visualization API
 securityDefinitions:
-  ApiKeyAuth:
+  jsonWebToken:
     type: apiKey
     in: header
-    name: X-API-Key
+    name: X-Auth-Token
 basePath: /v1
 # Describe your paths here
 paths:
@@ -18,16 +18,27 @@ paths:
         - auth
       parameters:
         -
-          name: X-Subject-Token
+          name: X-OpenStack-Auth-Token
           in: header
           type: string
           required: true
-          description: OpenStack token
+          description: OpenStack token with project scope or unscoped
+        - name: X-OpenStack-ProjectID
+          in: header
+          type: string
+          required: false
+          description: OpenStack project id in case if provided token is unscoped
       responses:
         200:
-          description: Token model
+          description: Token response contains token payload and JWT
           schema:
-            $ref: "#/definitions/Token"
+            $ref: "#/definitions/TokenResponse"
+        401:
+          description: |
+            Unauthorized.
+            Token is invalid or expired.
+          schema:
+            $ref: "#/definitions/Error"
 
   /datasources:
     # This is a HTTP operation
@@ -39,7 +50,7 @@ paths:
       tags:
         - datasource
       security:
-        - ApiKeyAuth: []
+        - jsonWebToken: []
       parameters:
         -
           name: name
@@ -60,7 +71,7 @@ paths:
       tags:
         - datasource
       security:
-        - ApiKeyAuth: []
+        - jsonWebToken: []
       parameters:
         - in: body
           name: body
@@ -83,7 +94,7 @@ paths:
       tags:
         - datasource
       security:
-        - ApiKeyAuth: []
+        - jsonWebToken: []
       parameters:
         -
           name: datasourceId
@@ -100,7 +111,7 @@ paths:
       tags:
         - datasource
       security:
-        - ApiKeyAuth: []
+        - jsonWebToken: []
       parameters:
        -
           name: datasourceId
@@ -125,7 +136,7 @@ paths:
       tags:
         - visualization
       security:
-        - ApiKeyAuth: []
+        - jsonWebToken: []
       parameters:
         -
           name: name
@@ -146,14 +157,14 @@ paths:
       tags:
         - visualization
       security:
-        - ApiKeyAuth: []
+        - jsonWebToken: []
       parameters:
         - in: body
           name: body
           description: Visualization defintion to add
           required: true
           schema:
-            $ref: "#/definitions/Visualization"
+            $ref: "#/definitions/Datasource"
       responses:
         200:
           description: Successful response
@@ -169,7 +180,7 @@ paths:
       tags:
         - visualization
       security:
-        - ApiKeyAuth: []
+        - jsonWebToken: []
       parameters:
         -
           name: visualizationId
@@ -195,7 +206,7 @@ paths:
       tags:
         - templates
       security:
-        - ApiKeyAuth: []
+        - jsonWebToken: []
       parameters:
         -
           name: name
@@ -222,7 +233,7 @@ paths:
       tags:
         - templates
       security:
-        - ApiKeyAuth: []
+        - jsonWebToken: []
       parameters:
         - in: body
           name: body
@@ -241,7 +252,7 @@ paths:
       tags:
         - templates
       security:
-        - ApiKeyAuth: []
+        - jsonWebToken: []
       parameters:
         -
           name: templateId
@@ -343,6 +354,18 @@ definitions:
   Token:
     type: object
     properties:
-      payload:
+      organizationId:
         type: string
-        description: Token payload
+        description: Organization id which token was issued for
+      expiresAt:
+        type: string
+        format: date-time
+        description: Time when current token will expire
+  TokenResponse:
+    type: object
+    properties:
+      token:
+        $ref: "#/definitions/Token"
+      jwt:
+        type: string
+        description: Token payload in JWT format
