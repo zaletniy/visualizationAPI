@@ -4,7 +4,11 @@ info:
   version: "1.0.0"
   title: Visualization API
 securityDefinitions:
-  jsonWebToken:
+  userApiToken:
+    type: apiKey
+    in: header
+    name: X-Auth-Token
+  adminApiToken:
     type: apiKey
     in: header
     name: X-Auth-Token
@@ -22,12 +26,7 @@ paths:
           in: header
           type: string
           required: true
-          description: OpenStack token with project scope or unscoped
-        - name: X-OpenStack-ProjectID
-          in: header
-          type: string
-          required: false
-          description: OpenStack project id in case if provided token is unscoped
+          description: OpenStack token with project scope
       responses:
         200:
           description: Token response contains token payload and JWT
@@ -50,7 +49,7 @@ paths:
       tags:
         - datasource
       security:
-        - jsonWebToken: []
+        - userApiToken: []
       parameters:
         -
           name: name
@@ -71,7 +70,7 @@ paths:
       tags:
         - datasource
       security:
-        - jsonWebToken: []
+        - userApiToken: []
       parameters:
         - in: body
           name: body
@@ -94,7 +93,7 @@ paths:
       tags:
         - datasource
       security:
-        - jsonWebToken: []
+        - userApiToken: []
       parameters:
         -
           name: datasourceId
@@ -111,7 +110,7 @@ paths:
       tags:
         - datasource
       security:
-        - jsonWebToken: []
+        - userApiToken: []
       parameters:
        -
           name: datasourceId
@@ -136,7 +135,7 @@ paths:
       tags:
         - visualization
       security:
-        - jsonWebToken: []
+        - userApiToken: []
       parameters:
         -
           name: name
@@ -157,7 +156,7 @@ paths:
       tags:
         - visualization
       security:
-        - jsonWebToken: []
+        - userApiToken: []
       parameters:
         - in: body
           name: body
@@ -180,7 +179,7 @@ paths:
       tags:
         - visualization
       security:
-        - jsonWebToken: []
+        - userApiToken: []
       parameters:
         -
           name: visualizationId
@@ -206,7 +205,7 @@ paths:
       tags:
         - templates
       security:
-        - jsonWebToken: []
+        - userApiToken: []
       parameters:
         -
           name: name
@@ -233,7 +232,7 @@ paths:
       tags:
         - templates
       security:
-        - jsonWebToken: []
+        - userApiToken: []
       parameters:
         - in: body
           name: body
@@ -252,7 +251,7 @@ paths:
       tags:
         - templates
       security:
-        - jsonWebToken: []
+        - userApiToken: []
       parameters:
         -
           name: templateId
@@ -265,6 +264,246 @@ paths:
           description: Successful response
           schema:
             $ref: "#/definitions/Template"
+        500:
+          description: Internal error
+          schema:
+            $ref: "#/definitions/Error"
+  /admin/organizations:
+    # This is a HTTP operation
+    get:
+      # Describe this verb here. Note: you can use markdown
+      description: |
+        Gets `Organizations` objects.
+      # This is array of GET operation parameters:
+      tags:
+        - admin
+      security:
+        - adminApiToken: []
+      parameters:
+        -
+          name: name
+          in: query
+          type: string
+          required: false
+          description: "Organization name to filter by"
+      responses:
+        # Response code
+        200:
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Organization"
+    post:
+      description: "Registers new `Organization`"
+      tags:
+        - admin
+      security:
+        - userApiToken: []
+      parameters:
+        - in: body
+          name: body
+          description: Ogranization defintion to add
+          required: true
+          schema:
+            $ref: "#/definitions/Organization"
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: "#/definitions/Organization"
+        409:
+          description: Conflict datasource
+          schema:
+            $ref: "#/definitions/Error"
+  /admin/organization/{organizationId}:
+    get:
+      description: Returns ogranization by id
+      tags:
+        - admin
+      security:
+        - adminApiToken: []
+      parameters:
+        -
+          name: organizationId
+          in: path
+          type: string
+          required: true
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: "#/definitions/Organization"
+    delete:
+      description: "Delete organization"
+      tags:
+        - admin
+      security:
+        - userApiToken: []
+      parameters:
+       -
+          name: organizationId
+          in: path
+          type: string
+          required: true
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: "#/definitions/Organization"
+        500:
+          description: Internal error
+          schema:
+            $ref: "#/definitions/Error"
+  /admin/organization/{organizationId}/users:
+    get:
+      description: List of all users in organization
+      tags:
+        - admin
+      security:
+        - adminApiToken: []
+      parameters:
+        -
+          name: organizationId
+          type: string
+          in: path
+          required: true
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/UserInOrganization"
+    post:
+      description: adds  user to organization
+      tags:
+        - admin
+      security:
+        - adminApiToken: []
+      parameters:
+        -
+          in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/UserInOrganization"
+        -
+          name: organizationId
+          type: string
+          in: path
+          required: true
+      responses:
+        200:
+          description: sdf
+          schema:
+            $ref: "#/definitions/UserInOrganization"
+    delete:
+      description: "Delete user from organization"
+      tags:
+        - admin
+      security:
+        - userApiToken: []
+      parameters:
+       -
+          name: organizationId
+          in: path
+          type: string
+          required: true
+       -
+          name: login
+          in: query
+          type: string
+          required: true
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: "#/definitions/UserInOrganization"
+        500:
+          description: Internal error
+          schema:
+            $ref: "#/definitions/Error"
+  /admin/users:
+    get:
+      description: |
+        Returns list of existing users
+      tags:
+        - admin
+      security:
+        - adminApiToken: []
+      parameters:
+        -
+          name: login
+          in: query
+          type: string
+          required: false
+          description: "User's login to filter by"
+      responses:
+        # Response code
+        200:
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/User"
+    post:
+      description: "Registers new `User`"
+      tags:
+        - admin
+      security:
+        - userApiToken: []
+      parameters:
+        - in: body
+          name: body
+          description: User defintion to add
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: "#/definitions/User"
+        409:
+          description: Conflict datasource
+          schema:
+            $ref: "#/definitions/Error"
+  /admin/user/{userId}:
+    get:
+      description: Returns user by id
+      tags:
+        - admin
+      security:
+        - adminApiToken: []
+      parameters:
+        -
+          name: userId
+          in: path
+          type: string
+          required: true
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: "#/definitions/User"
+    delete:
+      description: "Delete user"
+      tags:
+        - admin
+      security:
+        - userApiToken: []
+      parameters:
+       -
+          name: userId
+          in: path
+          type: string
+          required: true
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: "#/definitions/User"
         500:
           description: Internal error
           schema:
@@ -361,6 +600,9 @@ definitions:
         type: string
         format: date-time
         description: Time when current token will expire
+      isAdmin:
+        type: boolean
+        description: Indicates if token has admin scope
   TokenResponse:
     type: object
     properties:
@@ -369,3 +611,36 @@ definitions:
       jwt:
         type: string
         description: Token payload in JWT format
+  User:
+    type: object
+    properties:
+      userId:
+        type: string
+      name:
+        type: string
+      login:
+        type: string
+      email:
+        type: string
+        description: optional
+  Organization:
+    type: object
+    properties:
+      name:
+        type: string
+      organizationId:
+        type: string
+  UserInOrganization:
+    description: Used for querying users in organization
+    type: object
+    properties:
+      userId:
+        type: string
+      organizationId:
+        type: string
+      login:
+        type: string
+      email:
+        type: string
+      role:
+        type: string
