@@ -1,8 +1,4 @@
-# Visualization API
+# Visualization API (Moved out)
 
-V1
-===
-/!\ The API shouldn't be consider as stable and could be changed
+Swagger specification have been moved to [visualization-api](https://github.com/zaletniy/visualization-api) project
 
-* [View](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/zaletniy/visualizationAPI/master/visualizationAPI.yaml)
-* [Edit](http://editor.swagger.io/#/?import=https://raw.githubusercontent.com/zaletniy/visualizationAPI/master/visualizationAPI.yaml)
